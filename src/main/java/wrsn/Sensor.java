@@ -22,7 +22,7 @@ public class Sensor extends Node {
 				// propagate further
 				sendAll(message);
 			}
-		} else if (message.getFlag().equals("SENSING")) {
+		} else if (message.getFlag().equals("SENSING") || message.getFlag().equals("ALERT")) {
 			// retransmit up the tree
 			send(parent, message);
 		}
@@ -41,8 +41,13 @@ public class Sensor extends Node {
 	public void onClock() {
 		if (parent != null) { // if already in the tree
 			if (Math.random() < 0.02) { // from time to time...
-				double sensedValue = Math.random(); // sense a value
-				send(parent, new Message(sensedValue, "SENSING")); // send it to parent
+				//double sensedValue = Math.random(); // sense a value	
+				if(battery < 200) {
+					//getCommonLinkWith(parent).setColor(Color.blue);
+					send(parent, new Message(this.getLocation(),"ALERT"));
+					//System.out.println("Sensor : ALERT");
+				}
+				send(parent, new Message(battery, "SENSING")); // send it to parent
 			}
 		}
 	}
