@@ -35,7 +35,7 @@ public class WaypointNode extends Node {
 			} else {
 				setLocation(dest);
 				urgences.poll();
-				onArrival();
+				//onArrival();
 			}
 		}else {
 			if (!destinations.isEmpty()) {
