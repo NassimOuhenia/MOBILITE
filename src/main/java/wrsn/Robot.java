@@ -7,7 +7,7 @@ import io.jbotsim.ui.icons.Icons;
 
 public class Robot extends WaypointNode {
 	
-	private Point stationLocation = new Point(Math.random() * 600, Math.random() * 400);
+	private Point stationLocation;
 	@Override
 	public void onStart() {
 		setSensingRange(30);
@@ -30,7 +30,6 @@ public class Robot extends WaypointNode {
 
 	@Override
 	public void onMessage(Message message) {
-		super.onMessage(message);
 		if(message.getFlag().equals("LOC")){
 			stationLocation = (Point) message.getContent(); 
 		}

@@ -3,6 +3,7 @@ package wrsn;
 import io.jbotsim.core.LinkResolver;
 import io.jbotsim.core.Node;
 import io.jbotsim.core.Topology;
+import io.jbotsim.core.event.CommandListener;
 import io.jbotsim.ui.JViewer;
 
 public class Main {
@@ -35,6 +36,21 @@ public class Main {
 		tp.addNode(60, 80, new Robot());
 
 		new JViewer(tp);
+		
+		tp.addCommand("Perimeter");
+		tp.addCommandListener(new CommandListener() {
+
+			@Override
+			public void onCommand(String command) {
+
+				if (command.equals("Perimeter")) {
+					for (Node node : tp.getNodes()) {
+						if (node instanceof PerimeterTreeNode)
+							((PerimeterTreeNode) node).getPerimeter();
+					}
+				}
+			}
+		});
 		tp.start();
 	}
 }

@@ -5,15 +5,16 @@ import io.jbotsim.core.Node;
 import io.jbotsim.core.Point;
 import io.jbotsim.ui.icons.Icons;
 
-public class BaseStation extends Node {
+public class BaseStation extends PerimeterTreeNode {
+
 	@Override
 	public void onStart() {
 		setIcon(Icons.STATION);
 		setIconSize(16);
 
+		parent = this;
 		// Initiates tree construction with an empty message
-		sendAll(new Message(null, "INIT"));
-		sendAll(new Message(this.getLocation(),"LOC"));
+		sendAll(new Message(this, "INIT"));
 	}
 
 	@Override
@@ -30,6 +31,5 @@ public class BaseStation extends Node {
 			}
 		}
 	}
-	
-	
+
 }
