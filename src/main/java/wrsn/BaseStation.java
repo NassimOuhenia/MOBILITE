@@ -15,6 +15,7 @@ public class BaseStation extends PerimeterTreeNode {
 		parent = this;
 		// Initiates tree construction with an empty message
 		sendAll(new Message(this, "INIT"));
+		sendAll(new Message(this.getLocation(),"LOC"));
 	}
 
 	@Override
