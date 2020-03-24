@@ -11,21 +11,27 @@ public class Sensor extends PerimeterTreeNode {
 
 	@Override
 	public void onMessage(Message message) {
-
-		super.onMessage(message);
-
-		if (message.getFlag().equals("SENSING")) {
-			// retransmit up the tree
-			send(parent, message);
+		if (battery > 0) {
+			super.onMessage(message);
+			if (message.getFlag().equals("SENSING")) {
+				// retransmit up the tree
+				send(parent, message);
+			}
 		}
 	}
 
 	@Override
 	public void send(Node destination, Message message) {
+		
 		if (battery > 0) {
+			if (battery == 1)
+				super.send(destination, new Message(null,"DEAD"));//le message pour refaire l'arbre couvrant
 			super.send(destination, message);
 			battery--;
 			updateColor();
+			updatePanne(5);
+		} else {
+			updatePanne(1);
 		}
 	}
 
@@ -42,6 +48,19 @@ public class Sensor extends PerimeterTreeNode {
 				}
 				send(parent, new Message(battery, "SENSING")); // send it to parent
 			}
+
+		}
+
+	}
+
+	public void setTree(Node node, Integer width) {
+		getCommonLinkWith(node).setWidth(width);
+	}
+
+	public void updatePanne(Integer width) {
+		setTree(parent, width);
+		for (Node node : this.children) {
+			setTree(node, width);
 		}
 	}
 

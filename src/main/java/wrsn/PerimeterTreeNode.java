@@ -10,8 +10,8 @@ public class PerimeterTreeNode extends Node {
 	double perimeter[] = new double[4];
 
 	int numChildren = 0;
-	Node parent = null;
-	List<Node> children = new ArrayList<Node>();
+	protected Node parent = null;
+	protected List<Node> children = new ArrayList<Node>();
 
 	public void onMessage(Message message) {
 		// "INIT" flag : construction of the spanning tree
@@ -39,9 +39,14 @@ public class PerimeterTreeNode extends Node {
 					sendPerimeter();
 				}
 			}
+		} else if (message.getFlag().equals("DEAD")) {
+			if (parent != this) {
+				send(parent, new Message(null, "DEAD"));
+			} else {
+				sendAll(new Message(null, "RESET"));//reset l'arbre couvrant pas encore fait
+			}
 		}
 	}
-	
 	/**
 	 * définir deux perimètres différent pour les deux robots
 	 */
@@ -56,15 +61,12 @@ public class PerimeterTreeNode extends Node {
 		if (perimeter[2] < perimeter[3]) {
 			bot1[1] = perimeter[2];
 			bot1[3] = middle_y;
-			
 			bot2[0] = perimeter[0];
 			bot2[2] = middle_y;
 		} 
-		
 		sendAll(new Message(bot1, "BOT1"));
 		sendAll(new Message(bot2, "BOT2"));
 	}
-	
 	/**
 	 * mis à jour afin d'obtenir les extrémités de la topologie
 	 * @param content
@@ -75,16 +77,13 @@ public class PerimeterTreeNode extends Node {
 			perimeter[i] = (i < 2) ? Math.min(perimeter[i], content[i]) : Math.max(perimeter[i], content[i]);
 		}
 	}
-	
 	/**
 	 * l'envoie des positions des capteurs commençant par les feuilles
 	 */
 	public void getPerimeter() {
-
 		for (int i = 0; i < 4; i++) {
 			perimeter[i] = (i % 2 == 0) ? getX() : getY();
 		}
-
 		if (children.isEmpty()) {
 			send(parent, new Message(perimeter, "XY"));
 		}
