@@ -34,10 +34,11 @@ public class Sensor extends PerimeterTreeNode {
 		if (parent != null) { // if already in the tree
 			if (Math.random() < 0.02) { // from time to time...
 				// double sensedValue = Math.random(); // sense a value
-				if (battery < 200) {
+				if (battery < 100) {
 					// getCommonLinkWith(parent).setColor(Color.blue);
-					send(parent, new Message(this.getLocation(), "ALERT"));
+					send(parent, new Message(getLocation(), "ALERT"));
 					// System.out.println("Sensor : ALERT");
+					return;
 				}
 				send(parent, new Message(battery, "SENSING")); // send it to parent
 			}

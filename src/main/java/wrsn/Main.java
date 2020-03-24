@@ -32,8 +32,8 @@ public class Main {
 		tp.addNode(100, 80, new BaseStation());
 
 		// Add two robots
-		tp.addNode(90, 40, new Robot());
-		tp.addNode(60, 80, new Robot());
+		tp.addNode(90, 40, new Robot("BOT1"));
+		tp.addNode(60, 80, new Robot("BOT2"));
 
 		new JViewer(tp);
 		
