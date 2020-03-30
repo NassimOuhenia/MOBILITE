@@ -1,9 +1,8 @@
-package wrsn;
+
 
 import io.jbotsim.core.LinkResolver;
 import io.jbotsim.core.Node;
 import io.jbotsim.core.Topology;
-import io.jbotsim.core.event.CommandListener;
 import io.jbotsim.ui.JViewer;
 
 public class Main {
@@ -24,7 +23,7 @@ public class Main {
 
 		// Add sensors
 		tp.setDefaultNodeModel(Sensor.class);
-		String filename = "src/topology/sensors.tp"; // to be adapted
+		String filename = "./sensors.tp"; // to be adapted
 		String data = tp.getFileManager().read(filename);
 		tp.getSerializer().importFromString(tp, data);
 
@@ -32,25 +31,10 @@ public class Main {
 		tp.addNode(100, 80, new BaseStation());
 
 		// Add two robots
-		tp.addNode(90, 40, new Robot("BOT1"));
-		tp.addNode(60, 80, new Robot("BOT2"));
+		tp.addNode(90, 40, new Robot());
+		tp.addNode(60, 80, new Robot());
 
 		new JViewer(tp);
-		
-		tp.addCommand("Perimeter");
-		tp.addCommandListener(new CommandListener() {
-
-			@Override
-			public void onCommand(String command) {
-
-				if (command.equals("Perimeter")) {
-					for (Node node : tp.getNodes()) {
-						if (node instanceof PerimeterTreeNode)
-							((PerimeterTreeNode) node).getPerimeter();
-					}
-				}
-			}
-		});
 		tp.start();
 	}
 }
