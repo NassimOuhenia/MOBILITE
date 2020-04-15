@@ -30,7 +30,7 @@ public class Sensor extends Node {
 
 	@Override
 	public void send(Node destination, Message message) {
-		if (isAlive()) {
+		if (isAlive()) { // the Sensor is alive
 			super.send(destination, message);
 			battery--;
 			updateColor();
@@ -41,7 +41,9 @@ public class Sensor extends Node {
 	public void onClock() {
 		if (parent != null) { // if already in the tree
 			if (Math.random() < 0.02) { // from time to time...
-				Message message = new Message(getLocation(), "SENSING");
+				Message message = new Message(battery, "SENSING");
+				if (battery < 220)
+					message = new Message(getLocation(), "SENSING");
 				send(parent, message); // send it to parent
 			}
 		}
