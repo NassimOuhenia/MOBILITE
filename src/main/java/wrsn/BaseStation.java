@@ -2,15 +2,12 @@ package wrsn;
 
 import java.util.ArrayList;
 
-import io.jbotsim.core.Message;
-import io.jbotsim.core.Node;
-import io.jbotsim.core.Point;
+import io.jbotsim.core.*;
 import io.jbotsim.ui.icons.Icons;
 
 public class BaseStation extends Node {
 
 	ArrayList<Point> emergencies = new ArrayList<>();//destinations where to go first
-
 	@Override
 	public void onStart() {
 		setIcon(Icons.STATION);
@@ -39,6 +36,12 @@ public class BaseStation extends Node {
 		}
 	}
 	
+	@Override
+	public void onClock() {
+		super.onClock();
+		sendAll(new Message(this, "INIT"));
+	}
+	
 	/**
 	 * send destinations to the Node robot
 	 * @param robot
@@ -59,6 +62,21 @@ public class BaseStation extends Node {
 				send(robot, new Message(emergencies, "EMERGENCIES")); // send all destinations to one robot
 				emergencies.clear();
 			}
-		} 
+		}
+	}
+	
+	/**
+	 * rebuild the spanning tree
+	 * @param tp (getTopology())
+	 */
+	public static void reset(Topology tp) {
+		
+		for (Node node : tp.getNodes()) {
+			if (node instanceof Sensor) {
+				((Sensor) node).parent = null;
+			}
+		}
+		for (Link link : tp.getLinks())
+			link.setWidth(1);
 	}
 }

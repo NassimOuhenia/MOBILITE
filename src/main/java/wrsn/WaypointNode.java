@@ -8,7 +8,7 @@ import java.util.Queue;
 
 public class WaypointNode extends Node {
 	Queue<Point> destinations = new LinkedList<>();
-	double speed = 1;
+	double speed = 2;
 
 	public void addDestination(double x, double y) {
 		destinations.add(new Point(x, y));

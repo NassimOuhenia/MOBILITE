@@ -1,8 +1,6 @@
 package wrsn;
 
-import io.jbotsim.core.Color;
-import io.jbotsim.core.Message;
-import io.jbotsim.core.Node;
+import io.jbotsim.core.*;
 
 public class Sensor extends Node {
 	Node parent = null;
@@ -13,19 +11,24 @@ public class Sensor extends Node {
 		// "INIT" flag : construction of the spanning tree
 		// "SENSING" flag : transmission of the sensed values
 		// You can use other flags for your algorithms
-		if (message.getFlag().equals("INIT")) {
-			// if not yet in the tree
-			if (parent == null) {
-				// enter the tree
-				parent = message.getSender();
-				getCommonLinkWith(parent).setWidth(4);
-				// propagate further
-				sendAll(message);
+		if (isAlive()) {
+			String flag = message.getFlag();
+			if (flag.equals("INIT")) {
+				// if not yet in the tree
+				if (parent == null) {
+					// enter the tree
+					parent = message.getSender();
+					getCommonLinkWith(parent).setWidth(5);
+					// propagate further
+					sendAll(message);
+				}
+			} else if (flag.equals("SENSING")) {
+				// retransmit up the tree
+				if (parent != null)
+					send(parent, message);
 			}
-		} else if (message.getFlag().equals("SENSING")) {
-			// retransmit up the tree
-			send(parent, message);
 		}
+		
 	}
 
 	@Override
@@ -34,6 +37,10 @@ public class Sensor extends Node {
 			super.send(destination, message);
 			battery--;
 			updateColor();
+
+			if (!isAlive()) {
+				BaseStation.reset(getTopology());
+			}
 		}
 	}
 
@@ -42,7 +49,7 @@ public class Sensor extends Node {
 		if (parent != null) { // if already in the tree
 			if (Math.random() < 0.02) { // from time to time...
 				Message message = new Message(battery, "SENSING");
-				if (battery < 220)
+				if (battery < 200)
 					message = new Message(getLocation(), "SENSING");
 				send(parent, message); // send it to parent
 			}
@@ -52,7 +59,7 @@ public class Sensor extends Node {
 	protected void updateColor() {
 		setColor(battery == 0 ? Color.red : new Color(255 - battery, 255 - battery, 255));
 	}
-	
+
 	public boolean isAlive() {
 		return battery > 0;
 	}

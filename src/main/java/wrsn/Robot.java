@@ -2,15 +2,13 @@ package wrsn;
 
 import java.util.ArrayList;
 
-import io.jbotsim.core.Message;
-import io.jbotsim.core.Node;
-import io.jbotsim.core.Point;
+import io.jbotsim.core.*;
 import io.jbotsim.ui.icons.Icons;
 
 public class Robot extends WaypointNode {
 
 	Node base = null;
-	ArrayList<Point> emergenies = new ArrayList<>();// choose the closest neighbor in this list
+	ArrayList<Point> emergencies = new ArrayList<>();// choose the closest neighbor in this list
 
 	@Override
 	public void onStart() {
@@ -24,8 +22,16 @@ public class Robot extends WaypointNode {
 
 	@Override
 	public void onSensingIn(Node node) {
-		if (node instanceof Sensor)
-			((Sensor) node).battery = 255;
+		if (node instanceof Sensor) {
+			Sensor sensor = (Sensor) node;
+			
+			if (!sensor.isAlive()) {
+				sensor.battery = 255;
+				BaseStation.reset(getTopology());
+				return;
+			}
+			sensor.battery = 255;
+		}
 	}
 
 	@SuppressWarnings("unchecked")
@@ -37,40 +43,42 @@ public class Robot extends WaypointNode {
 			addDestination(base.getX(), base.getY());
 		}
 		if (flag.equals("EMERGENCIES"))
-			emergenies.addAll((ArrayList<Point>) message.getContent()); // add all destinations
+			emergencies.addAll((ArrayList<Point>) message.getContent()); // add all destinations
 	}
 
 	@Override
 	public void onArrival() {
 		if (getLocation().equals(base.getLocation())) {
-			send(base, new Message(null, "ASK")); //ASK for emergencies
+			send(base, new Message(null, "ASK")); // ASK for emergencies
 		}
 
-		if (emergenies.isEmpty()) { // no emergencies go back to the base station 
+		if (emergencies.isEmpty()) { // no emergencies go back to the base station
 			addDestination(base.getX(), base.getY());
 		} else {
 			choose_destination(); // choose the closest neighbor
 		}
 	}
-	
+
 	/**
 	 * go to the closest neighbor
 	 */
 	public void choose_destination() {
 		int index_min_distance = 0;
-		double min_distance = distA_To_B(getLocation(), emergenies.get(0));
+		double min_distance = distA_To_B(getLocation(), emergencies.get(0));
 
-		for (int i = 1; i < emergenies.size(); i++) {
-			double newdist = distA_To_B(getLocation(), emergenies.get(i));
+		for (int i = 1; i < emergencies.size(); i++) {
+			
+			double newdist = distA_To_B(getLocation(), emergencies.get(i));// distance to Sensor #i
+			
 			if (newdist < min_distance) {
 				min_distance = newdist;
 				index_min_distance = i;
 			}
 		}
-		destinations.add(emergenies.get(index_min_distance));
-		emergenies.remove(index_min_distance);
+		destinations.add(emergencies.get(index_min_distance));
+		emergencies.remove(index_min_distance);
 	}
-	
+
 	/**
 	 * 
 	 * @param a Point
