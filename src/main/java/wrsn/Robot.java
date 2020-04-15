@@ -9,34 +9,17 @@ import io.jbotsim.ui.icons.Icons;
 
 public class Robot extends WaypointNode {
 
-	private Point stationLocation = new Point(Math.random() * 600, Math.random() * 400);
-	private String name;
-
-	double inf_x = 0;
-	double sup_x = 600;
-	double inf_y = 0;
-	double sup_y = 400;
-
-	public Robot(String _name) {
-		name = _name;
-	}
-
-	public void setExtrimities(double[] extrimities) {
-
-		setInf_x(extrimities[0]);
-		setSup_x(extrimities[1]);
-		setInf_y(extrimities[2]);
-		setSup_y(extrimities[3]);
-
-		System.out.println("Start.......");
-		onArrival();
-	}
+	Node base = null;
+	ArrayList<Point> emergenies = new ArrayList<>();
 
 	@Override
 	public void onStart() {
+
 		setSensingRange(30);
 		setIcon(Icons.ROBOT);
 		setIconSize(16);
+
+		sendAll(new Message(getID(), "ROBOT"));
 	}
 
 	@Override
@@ -45,62 +28,49 @@ public class Robot extends WaypointNode {
 			((Sensor) node).battery = 255;
 	}
 
-	public void randomDest() {
-		double range_x = sup_x - inf_x + 1;
-		double range_y = sup_y - inf_y + 1;
-
-		double x = (Math.random() * range_x) + inf_x;
-		double y = (Math.random() * range_y) + inf_y;
-
-		addDestination(x, y);
+	@SuppressWarnings("unchecked")
+	@Override
+	public void onMessage(Message message) {
+		String flag = message.getFlag();
+		if (flag.equals("BASE")) {
+			base = message.getSender(); // Initiate the BaseStation
+			addDestination(base.getX(), base.getY());
+		}
+		if (flag.equals("EMERGENCIES"))
+			emergenies.addAll((ArrayList<Point>) message.getContent()); // add all destinations
 	}
 
 	@Override
 	public void onArrival() {
-
-		if (getLocation().equals(stationLocation)) {
-			System.out.println(name + " > Is there emergencies?");
-			sendAll(new Message(null, name));
+		if (getLocation().equals(base.getLocation())) {
+			send(base, new Message(null, "ASK"));
 		}
 
-		if (Math.random() < 0.2) {
-			addDestination(stationLocation.getX(), stationLocation.getY());
+		if (emergenies.isEmpty()) {
+			addDestination(base.getX(), base.getY());
+		} else {
+			choose_destination();
 		}
 
-		randomDest();
 	}
 
-	@SuppressWarnings("unchecked")
-	@Override
-	public void onMessage(Message message) {
-		if (message.getFlag().equals(name)) {
-			double[] content = (double[]) message.getContent();
-			setExtrimities(content);
-			setStationLocation(new Point(content[4], content[5]));
-		} else if (message.getFlag().equals("URGENCES" + name)) {
-			urgences.addAll((ArrayList<Point>) message.getContent());
+	public void choose_destination() {
+		int index_min_distance = 0;
+		double min_distance = distA_To_B(getLocation(), emergenies.get(0));
+
+		for (int i = 1; i < emergenies.size(); i++) {
+			double newdist = distA_To_B(getLocation(), emergenies.get(i));
+			if (newdist < min_distance) {
+				min_distance = newdist;
+				index_min_distance = i;
+			}
 		}
+		destinations.add(emergenies.get(index_min_distance));
+		emergenies.remove(index_min_distance);
 	}
 
-	// setters
-	public void setStationLocation(Point stationLocation) {
-		this.stationLocation = stationLocation;
-	}
-
-	public void setInf_x(double inf_x) {
-		this.inf_x = inf_x;
-	}
-
-	public void setSup_x(double sup_x) {
-		this.sup_x = sup_x;
-	}
-
-	public void setInf_y(double inf_y) {
-		this.inf_y = inf_y;
-	}
-
-	public void setSup_y(double sup_y) {
-		this.sup_y = sup_y;
+	public double distA_To_B(Point a, Point b) {
+		return Math.sqrt((Math.pow(b.getX() - a.getX(), 2)) + (Math.pow(b.getY() - a.getY(), 2)));
 	}
 
 }

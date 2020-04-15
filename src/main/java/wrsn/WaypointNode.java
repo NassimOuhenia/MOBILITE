@@ -7,18 +7,11 @@ import java.util.LinkedList;
 import java.util.Queue;
 
 public class WaypointNode extends Node {
-
 	Queue<Point> destinations = new LinkedList<>();
-	Queue<Point> urgences = new LinkedList<>();// les points prioritaires
-
 	double speed = 1;
 
 	public void addDestination(double x, double y) {
 		destinations.add(new Point(x, y));
-	}
-
-	public void addPriorityDestination(Point p) {
-		urgences.add(p);
 	}
 
 	public void setSpeed(double speed) {
@@ -27,29 +20,15 @@ public class WaypointNode extends Node {
 
 	@Override
 	public void onClock() {
-		if (!urgences.isEmpty()) {
-			// System.out.println("urgencesssssssssssssssss");
-			Point dest = urgences.peek();
+		if (!destinations.isEmpty()) {
+			Point dest = destinations.peek();
 			if (distance(dest) > speed) {
-
 				setDirection(dest);
 				move(speed);
 			} else {
 				setLocation(dest);
-				urgences.poll();
+				destinations.poll();
 				onArrival();
-			}
-		} else {
-			if (!destinations.isEmpty()) {
-				Point dest = destinations.peek();
-				if (distance(dest) > speed) {
-					setDirection(dest);
-					move(speed);
-				} else {
-					setLocation(dest);
-					destinations.poll();
-					onArrival();
-				}
 			}
 		}
 	}
