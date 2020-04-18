@@ -1,14 +1,11 @@
 package wrsn;
 
-import io.jbotsim.core.Node;
-import io.jbotsim.core.Point;
-
-import java.util.LinkedList;
-import java.util.Queue;
+import io.jbotsim.core.*;
+import java.util.*;
 
 public class WaypointNode extends Node {
 	Queue<Point> destinations = new LinkedList<>();
-	double speed = 2;
+	double speed = 1;
 
 	public void addDestination(double x, double y) {
 		destinations.add(new Point(x, y));

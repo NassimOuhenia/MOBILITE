@@ -3,6 +3,7 @@ package wrsn;
 import io.jbotsim.core.*;
 
 public class Sensor extends Node {
+	
 	Node parent = null;
 	int battery = 255;
 
@@ -48,10 +49,7 @@ public class Sensor extends Node {
 	public void onClock() {
 		if (parent != null) { // if already in the tree
 			if (Math.random() < 0.02) { // from time to time...
-				Message message = new Message(battery, "SENSING");
-				if (battery < 200)
-					message = new Message(getLocation(), "SENSING");
-				send(parent, message); // send it to parent
+				send(parent, new Message(this, "SENSING")); // send it to parent
 			}
 		}
 	}
@@ -62,5 +60,19 @@ public class Sensor extends Node {
 
 	public boolean isAlive() {
 		return battery > 0;
+	}
+		
+	@Override
+	public String toString() {
+		// TODO Auto-generated method stub
+		return getID()+":"+battery;
+	}
+
+	@Override
+	public int compareTo(Node o) {
+		if (o instanceof Sensor) {
+			return battery - ((Sensor)o).battery;
+		}
+		return 0;
 	}
 }
